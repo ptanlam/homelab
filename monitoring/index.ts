@@ -102,10 +102,50 @@ export class Monitoring extends pulumi.ComponentResource {
       { dependsOn: [namespace], parent: this },
     );
 
+    const grafana = new kubernetes.helm.v3.Release(
+      'grafana',
+      {
+        chart: path.join(cwd(), '_charts/grafana'),
+        namespace: namespace.metadata.name,
+        values: {
+          server: {
+            persistenceVolume: {
+              enabled: true,
+              size: '10Gi',
+              storageClass: 'longhorn',
+            },
+          },
+
+          ingress: {
+            enabled: true,
+            ingressClassName: 'nginx',
+            annotations: {
+              'cert-manager.io/issuer': 'monitoring-ca',
+            },
+            hosts: ['grafana.home'],
+            path: '/',
+            tls: [{ hosts: ['grafana.home'], secretName: 'grafana-tls' }],
+          },
+          resources: {
+            requests: {
+              cpu: '100m',
+              memory: '128Mi',
+            },
+            limits: {
+              cpu: '200m',
+              memory: '256Mi',
+            },
+          },
+        },
+      },
+      { dependsOn: [namespace], parent: this },
+    );
+
     // Register outputs
     this.registerOutputs({
       namespace: namespace,
       prometheus: prometheus,
+      grafana: grafana,
     });
   }
 }
