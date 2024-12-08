@@ -5,8 +5,8 @@ import * as kubernetes from '@pulumi/kubernetes'
 import * as pulumi from '@pulumi/pulumi'
 
 export class Pihole extends pulumi.ComponentResource {
-  constructor(opts?: pulumi.ComponentResourceOptions) {
-    super('homelab:networking:Pihole', 'pihole', opts);
+  constructor(args?: pulumi.Inputs, opts?: pulumi.ComponentResourceOptions) {
+    super('homelab:networking:Pihole', 'pihole', args, opts);
 
     const namespace = new kubernetes.core.v1.Namespace(
       'pihole',

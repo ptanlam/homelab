@@ -5,8 +5,8 @@ import * as kubernetes from '@pulumi/kubernetes'
 import * as pulumi from '@pulumi/pulumi'
 
 export class Storage extends pulumi.ComponentResource {
-  constructor(opts?: pulumi.ComponentResourceOptions) {
-    super('homelab:storage:Storage', 'storage', opts);
+  constructor(args?: pulumi.Inputs, opts?: pulumi.ComponentResourceOptions) {
+    super('homelab:storage:Storage', 'storage', args, opts);
 
     const namespace = new kubernetes.core.v1.Namespace(
       'storage',

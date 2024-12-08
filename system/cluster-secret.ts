@@ -2,8 +2,8 @@ import * as kubernetes from '@pulumi/kubernetes'
 import * as pulumi from '@pulumi/pulumi'
 
 export class ClusterSecret extends pulumi.ComponentResource {
-  constructor(opts?: pulumi.ComponentResourceOptions) {
-    super('homelab:system:ClusterSecret', 'cluster-secret', opts);
+  constructor(args?: pulumi.Inputs, opts?: pulumi.ComponentResourceOptions) {
+    super('homelab:system:ClusterSecret', 'cluster-secret', args, opts);
 
     new kubernetes.helm.v3.Release(
       'cluster-secret',

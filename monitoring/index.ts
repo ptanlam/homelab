@@ -141,11 +141,73 @@ export class Monitoring extends pulumi.ComponentResource {
       { dependsOn: [namespace], parent: this },
     );
 
+    const uptimeKuma = new kubernetes.helm.v3.Release(
+      'uptime-kuma',
+      {
+        chart: path.join(cwd(), '_charts/uptime-kuma'),
+        namespace: namespace.metadata.name,
+        values: {
+          ingress: {
+            enabled: false,
+          },
+          volume: {
+            enabled: true,
+            size: '10Gi',
+          },
+          resources: {
+            requests: {
+              cpu: '100m',
+              memory: '128Mi',
+            },
+            limits: {
+              cpu: '200m',
+              memory: '256Mi',
+            },
+          },
+        },
+      },
+      { dependsOn: [namespace], parent: this },
+    );
+
+    const uptimeKumaIngress = new kubernetes.networking.v1.Ingress(
+      'uptime-kuma-ingress',
+      {
+        metadata: {
+          name: uptimeKuma.name,
+          namespace: namespace.metadata.name,
+          annotations: {
+            'cert-manager.io/issuer': 'monitoring-ca',
+          },
+        },
+
+        spec: {
+          ingressClassName: 'nginx',
+          rules: [
+            {
+              host: 'uptime.home',
+              http: {
+                paths: [
+                  {
+                    path: '/',
+                    pathType: 'ImplementationSpecific',
+                    backend: { service: { name: uptimeKuma.name, port: { number: 3001 } } },
+                  },
+                ],
+              },
+            },
+          ],
+          tls: [{ hosts: ['uptime.home'], secretName: 'uptime-kuma-tls' }],
+        },
+      },
+      { dependsOn: [uptimeKuma], parent: this },
+    );
+
     // Register outputs
     this.registerOutputs({
       namespace: namespace,
       prometheus: prometheus,
       grafana: grafana,
+      uptimeKuma: uptimeKuma,
     });
   }
 }

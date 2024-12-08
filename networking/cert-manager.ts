@@ -8,8 +8,8 @@ import * as pulumi from '@pulumi/pulumi'
 export class CertManager extends pulumi.ComponentResource {
   rootCaCert: kubernetes.apiextensions.CustomResource;
 
-  constructor(opts?: pulumi.ComponentResourceOptions) {
-    super('homelab:networking:CertManager', 'cert-manager', opts);
+  constructor(args?: pulumi.Inputs, opts?: pulumi.ComponentResourceOptions) {
+    super('homelab:networking:CertManager', 'cert-manager', args, opts);
 
     const namespace = new kubernetes.core.v1.Namespace(
       'cert-manager',
@@ -25,6 +25,9 @@ export class CertManager extends pulumi.ComponentResource {
       'cert-manager',
       {
         installCRDs: false,
+        prometheus: {
+          enabled: true,
+        },
         helmOptions: {
           namespace: namespace.metadata.name,
           values: {
